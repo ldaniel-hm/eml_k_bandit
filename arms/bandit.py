@@ -1,0 +1,107 @@
+# bandit.py
+from typing import List
+
+import numpy as np
+
+from arms.arm import Arm
+from arms.armnormal import ArmNormal
+
+
+class Bandit:
+    def __init__(self, arms: List[Arm]):
+        """
+        Initializes the bandit with a list of arms.
+
+        :param arms: List of instances of classes derived from Arm.
+        :type arms: list of Arm
+        """
+        self.arms = arms
+        self.k = len(arms)
+        self.expected_rewards = self.get_expected_rewards()
+        self.optimal_arm = self.get_optimal_arm()
+
+    def pull_arm(self, index: int) -> float:
+        """
+        Pulls a specific arm and returns the reward.
+
+        :param index: Index of the arm to pull (0 to k-1).
+        :return: Reward obtained from the arm.
+        :raises IndexError: If the index is out of the valid range.
+        """
+        if index < 0 or index >= self.k:
+            raise IndexError("Arm index out of range.")
+
+        reward = self.arms[index].pull()
+        return reward
+
+    def get_optimal_arm(self) -> int:
+        """
+        Identifies the arm with the highest expected reward.
+
+        :return: Index of the optimal arm.
+        """
+
+        optimal_arm = np.argmax(self.expected_rewards)
+        return optimal_arm
+
+    def get_expected_rewards(self) -> List[float]:
+        """
+        Returns the reward of each arm in the bandit.
+
+        :return: List of rewards for each arm.
+        :rtype: list of float or int
+        """
+        rewards = [arm.get_expected_value() for arm in self.arms]
+        return rewards
+
+    def get_expected_value(self, numer_arm):
+        return self.arms[numer_arm].get_expected_value()
+
+
+    def compute_cota(self) -> float:
+        """
+        Calcula la Cota definida como:
+        Cota = sum_{i: mu_i < mu*} (mu* - mu_i) / I(mu_i, mu*)
+
+        Donde:
+        - mu* es la recompensa esperada del brazo óptimo.
+        - mu_i son las recompensas esperadas de los demás brazos.
+        - I(mu_i, mu*) es la divergencia de Kullback-Leibler entre el brazo i y el óptimo.
+
+        :return: Valor calculado de la Cota.
+        :rtype: float
+        """
+        cota = 0.0
+        mu_star = self.expected_rewards[self.optimal_arm]
+        arm_star = self.arms[self.optimal_arm]
+
+        for i, arm in enumerate(self.arms):
+            if self.expected_rewards[i] < mu_star:
+                mu_i = self.expected_rewards[i]
+                kl = arm.kl_divergence(arm_star)
+
+                if kl == 0:
+                    raise ValueError(
+                        f"La divergencia KL es cero para el brazo índice {i}. No se puede dividir por cero.")
+
+                cota += (mu_star - mu_i) / kl
+
+        return cota
+
+
+    def __len__(self):
+        """
+        Returns the number of arms in the bandit.
+        :return:
+        """
+        return self.k
+
+    def __str__(self):
+        """
+        String representation of the bandit showing the types of arms.
+
+        :return: Detailed description of the bandit and its arms.
+        :rtype: str
+        """
+        arms_description = ", ".join([str(arm) for arm in self.arms])
+        return f"Bandit with {self.k} arms: {arms_description}"
