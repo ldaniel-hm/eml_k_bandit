@@ -1,6 +1,21 @@
+"""
+Module: arms/armnormal.py
+Description: Contains the implementation of the ArmNormal class for the normal distribution arm.
+
+Author: Luis Daniel Hernández Molinero
+Email: ldaniel@um.es
+Date: 2025/01/29
+
+This software is licensed under the GNU General Public License v3.0 (GPL-3.0),
+with the additional restriction that it may not be used for commercial purposes.
+
+For more details about GPL-3.0: https://www.gnu.org/licenses/gpl-3.0.html
+"""
+
+
 import numpy as np
 
-from arms.arm import Arm
+from arms import Arm
 
 
 class ArmNormal(Arm):
@@ -49,7 +64,7 @@ class ArmNormal(Arm):
 
         # Generar k- valores únicos de mu con decimales
         mu_values = set()
-        while (len(mu_values) < k):
+        while len(mu_values) < k:
             mu = np.random.uniform(mu_min, mu_max)
             mu = round(mu, 2)
             mu_values.add(mu)
