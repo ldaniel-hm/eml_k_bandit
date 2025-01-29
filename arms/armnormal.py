@@ -49,6 +49,14 @@ class ArmNormal(Arm):
 
         return self.mu
 
+    def __str__(self):
+        """
+        Representación en cadena del brazo normal.
+
+        :return: Descripción detallada del brazo normal.
+        """
+        return f"ArmNormal(mu={self.mu}, sigma={self.sigma})"
+
     @classmethod
     def generate_arms(cls, k: int, mu_min: float = 1, mu_max: float = 10.0):
         """
@@ -75,3 +83,5 @@ class ArmNormal(Arm):
         arms = [ArmNormal(mu, sigma) for mu in mu_values]
 
         return arms
+
+
