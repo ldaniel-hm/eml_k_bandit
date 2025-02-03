@@ -71,38 +71,6 @@ class Bandit:
     def get_expected_value(self, numer_arm):
         return self.arms[numer_arm].get_expected_value()
 
-
-    def compute_cota(self) -> float:
-        """
-        Calcula la Cota definida como:
-        Cota = sum_{i: mu_i < mu*} (mu* - mu_i) / I(mu_i, mu*)
-
-        Donde:
-        - mu* es la recompensa esperada del brazo óptimo.
-        - mu_i son las recompensas esperadas de los demás brazos.
-        - I(mu_i, mu*) es la divergencia de Kullback-Leibler entre el brazo i y el óptimo.
-
-        :return: Valor calculado de la Cota.
-        :rtype: float
-        """
-        cota = 0.0
-        mu_star = self.expected_rewards[self.optimal_arm]
-        arm_star = self.arms[self.optimal_arm]
-
-        for i, arm in enumerate(self.arms):
-            if self.expected_rewards[i] < mu_star:
-                mu_i = self.expected_rewards[i]
-                kl = arm.kl_divergence(arm_star)
-
-                if kl == 0:
-                    raise ValueError(
-                        f"La divergencia KL es cero para el brazo índice {i}. No se puede dividir por cero.")
-
-                cota += (mu_star - mu_i) / kl
-
-        return cota
-
-
     def __len__(self):
         """
         Returns the number of arms in the bandit.
